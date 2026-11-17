@@ -108,7 +108,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
 .clz select{width:auto;display:inline-block;padding:3px 8px;margin:0 2px;border-radius:8px;font-size:14px;max-width:100%}
 .clz select.good{border-color:var(--ok);background:var(--okbg)}.clz select.bad{border-color:var(--err);background:var(--errbg)}
 .fact{padding:8px 12px;border-left:3px solid var(--blue);background:var(--card2);border-radius:0 8px 8px 0;margin-bottom:6px;font-size:14px}
-.sticky{position:sticky;bottom:76px;background:linear-gradient(transparent,var(--bg) 30%);padding-top:14px;margin-top:6px}
+.sticky{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%);padding-top:14px;margin-top:6px}
 .sec-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--txm)}
 .res-big{font-size:44px;font-weight:900;line-height:1}
 .pass{color:var(--ok)}.fail{color:var(--err)}
@@ -208,6 +208,9 @@ details summary::-webkit-details-marker{color:var(--acc)}
 .sigopt{padding:4px 6px 6px}.siggrid{gap:8px}
 @media (min-width:1000px){.sigbig{max-width:170px}.sigopt .sigsvg{max-width:120px}}
 .sig2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sig2 .opt{margin:0;padding:10px;font-size:13.5px;align-items:center}.sig2 .opt .bx{width:18px;height:18px}
+
+/* Mode quiz/examen sur mobile : barre du bas masquée, bouton toujours visible */
+@media (max-width:999px){.app.focus .nav{display:none}.app.focus{padding-bottom:12px}.app.focus .sticky{bottom:0;padding-bottom:calc(10px + env(safe-area-inset-bottom))}}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -1564,6 +1567,8 @@ function render(){
   if(ST.level==null&&VIEW!=='settings'){$('#app').innerHTML=header()+`<div class="wrap">${levelPicker(true)}</div>`;return;}
   const V={home:vHome,rules:vRules,topic:vTopic,defs:vDefs,deflist:vDefList,exam:vExam,review:vReview,settings:vSettings,session:vSession};
   const narrow=['session','settings'].includes(VIEW)||(VIEW==='exam'&&SES&&SES.phase!=='run');
+  const focus=VIEW==='session'||(VIEW==='exam'&&SES&&(SES.phase==='run'||SES.phase==='corr'));
+  $('#app').className='app'+(focus?' focus':'');
   $('#app').innerHTML=header()+`<div class="wrap v-${VIEW} ${narrow?'narrow':''}" id="main">${(V[VIEW]||vHome)()}</div>`+nav();
   if(VIEW==='session'||(VIEW==='exam'&&SES))afterSession();
 }
@@ -1819,7 +1824,8 @@ function setAns(v){const S=SES;if(!S||S.st==='show')return;const it=S.items[S.i]
 function checkItem(){const S=SES;const it=S.items[S.i];
   if(it.type==='q'&&(it.q.t==='open'||it.q.t==='case'))S.ticks=autoTicks(S.cur||'',it.q.k);
   if(it.type==='rap')S.ticks=autoTicks(S.cur||'',it.r.k);
-  S.st='show';render();}
+  S.st='show';render();
+  requestAnimationFrame(()=>{const fb=document.querySelector('#main .fb');if(!fb)return;const r=fb.getBoundingClientRect(),st=document.querySelector('.sticky');const lim=innerHeight-(st?st.offsetHeight+16:90);if(r.bottom>lim){const dy=Math.min(r.top-70,r.bottom-lim);if(dy>0)scrollBy({top:dy,behavior:'smooth'});}});}
 function tick(i){SES.ticks[i]=!SES.ticks[i];render();}
 function revealCard(){SES.st='show';render();}
 function rateCard(v){SES.cur=v;nextItem();}
