@@ -1300,6 +1300,48 @@ const SIGNALS=[
  {k:'aatouche',n:'Arbitre assistant : touche et équipe qui lance',d:"Drapeau levé, à la marque de touche, l'autre bras tendu vers l'équipe qui bénéficie du lancer.",l:2,aa:1,A:[[44,20],[43,0]],B:[[95,42],[116,42]],x:`<line x1="43" y1="2" x2="43" y2="-14" stroke="#333" stroke-width="2"/><rect x="29" y="-14" width="14" height="10" fill="#F5C400"/>`}
 ];
 const SIGBY={};SIGNALS.forEach(s=>SIGBY[s.k]=s);
+// Corrections de position et positions « fantômes » (2e position des gestes en va-et-vient)
+const PATCH={
+ enavant:{B:[[82,22],[68,0]],gB:[90,4]},
+ pasdroit:{B:[[82,22],[72,1]],gB:[95,10]},
+ injtac:{gA:[9,25]},
+ noessai:{A:[[50,62],[74,72]],B:[[70,62],[46,72]],gA:[26,80],gB:[94,80]},
+ paslache:{A:[[38,62],[57,70]],B:[[82,62],[63,70]],gA:[28,82],gB:[92,82]},
+ haut:{B:[[90,50],[50,33]],gB:[78,31]},
+ cote:{gB:[90,82]},
+ tomber:{gB:[110,64]},
+ lateral:{B:[[92,58],[64,56]],gB:[104,58]},
+ alhj:{B:[[90,62],[56,58]],gB:[98,60]},
+ hjruck:{B:[[78,66],[80,86]],gB:[95,82]},
+ talmain:{B:[[80,64],[84,86]],gB:[96,82],x:qarrow(76,96,88,106,102,94,1)},
+ effondre:{gA:[22,74],gB:[98,74]},
+ pilsol:{gB:[92,84]},
+ piltire:{gB:[92,58],gBend:true},
+ liaison:{A:[[54,62],[88,45]],gA:[76,46]},
+ alappui:{gB:[106,64]},
+ alpousse:{gA:[22,30],gB:[98,30]},
+ couloir:{A:[[38,38],[48,16]],B:[[82,38],[72,16]],gA:[36,16],gB:[84,16]},
+ souleve:{gA:[50,60],gB:[70,60]},
+ injmaul:{gA:[6,58]},
+ ecart:{gB:[90,58]},
+ passeav:{gA:[64,58],gB:[80,54]},
+ sang:{A:[[40,20],[66,2]],B:[[80,20],[54,2]]},
+ formme:{A:[[37,22],[58,6]],B:[[83,22],[62,6]]},
+ temps:{A:[[40,22],[76,14]],B:[[67,40],[60,14]]},
+ obstr:{A:[[46,64],[72,46]],B:[[74,64],[48,46]]},
+ pied:{lean:12,leg:[[71,124],[84,94]],B:[[0,0],[84,91]],world:true},
+ pietine:{gleg:[[68,122],[69,145]]}
+};
+for(const k in PATCH){Object.assign(SIGBY[k],PATCH[k]);}
+const LU=23,LF=21;
+function ik(S,E0,H){const dx=H[0]-S[0],dy=H[1]-S[1];let d=Math.hypot(dx,dy);const ux=dx/d,uy=dy/d;
+  if(d>=LU+LF-0.01){const e=[S[0]+ux*LU,S[1]+uy*LU];return[e,[S[0]+ux*(LU+LF),S[1]+uy*(LU+LF)]];}
+  if(d<Math.abs(LU-LF)+1){d=Math.abs(LU-LF)+1;}
+  const a=(LU*LU-LF*LF+d*d)/(2*d),h=Math.sqrt(Math.max(0,LU*LU-a*a));const px=S[0]+ux*a,py=S[1]+uy*a;
+  const c1=[px-uy*h,py+ux*h],c2=[px+uy*h,py-ux*h];const pick=Math.hypot(c1[0]-E0[0],c1[1]-E0[1])<=Math.hypot(c2[0]-E0[0],c2[1]-E0[1])?c1:c2;
+  return[pick,[S[0]+ux*d,S[1]+uy*d]];}
+function rotP(p,ang,c){const r=ang*Math.PI/180,x=p[0]-c[0],y=p[1]-c[1];return[c[0]+x*Math.cos(r)-y*Math.sin(r),c[1]+x*Math.sin(r)+y*Math.cos(r)];}
+
 const SKIN='#e8b48a',SKIND='#c98f63',KIT='#1f3a8a',KITD='#152a66',SHORT='#1b1b22',BOOT='#111',SOCK='#1f3a8a';
 function seg(a,b,w,c,o){return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${o?` opacity="${o}"`:''}/>`;}
 function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
@@ -1312,24 +1354,31 @@ function legSVG(hip,knee,foot){const sockTop=lerp(knee,foot,.42);const ank=foot;
   return limb(hip,knee,9.4,SKIN,SKIND)+limb(knee,ank,7.8,SKIN,SKIND)+limb(sockTop,ank,8.6,SOCK,KITD)+(()=>{const p=lerp(sockTop,ank,.04),q=lerp(sockTop,ank,.16);return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#fff" stroke-width="8.6"/>`;})()+
   `<ellipse cx="${ank[0]}" cy="${ank[1]+3}" rx="6.5" ry="3.6" fill="${BOOT}"/>`;}
 function sigSVG(k,size){
-  const s=SIGBY[k];const A=s.A||ARMDOWN.A,B=s.B||ARMDOWN.B;
-  const kit=s.aa?'#c8a24a':KIT,kitd=s.aa?'#9c7b2c':KITD;
+  const s=SIGBY[k];const kit=s.aa?'#c8a24a':KIT,kitd=s.aa?'#9c7b2c':KITD;
+  const C=[60,98];const lean=s.lean||0;
+  const straight=(S,E,H)=>{const a1=Math.atan2(E[1]-S[1],E[0]-S[0]),a2=Math.atan2(H[1]-E[1],H[0]-E[0]);let d=Math.abs(a1-a2);if(d>Math.PI)d=2*Math.PI-d;return d<0.42;};
+  const full=(S,H)=>{const dx=H[0]-S[0],dy=H[1]-S[1],L=Math.hypot(dx,dy);return[[S[0]+dx/L*LU,S[1]+dy/L*LU],[S[0]+dx/L*(LU+LF),S[1]+dy/L*(LU+LF)]];};
+  const arm=(side,spec)=>{const S=SH[side];let H=spec[1];if(s.world&&lean)H=rotP(H,-lean,C);const E0=spec[0]&&spec[0][0]?spec[0]:[S[0]+(side==='A'?-10:10),S[1]+20];if(!s.world&&spec[0]&&spec[0][0]&&straight(S,E0,H))return full(S,H);return ik(S,E0,H);};
+  const mA=arm('A',s.A||ARMDOWN.A),mB=arm('B',s.B||ARMDOWN.B);
+  const ghost=(side,m,t)=>{if(!t)return '';const S=SH[side];const g=!s.gBend&&straight(S,m[0],m[1])?full(S,t):ik(S,[S[0]+(side==='A'?-14:14),S[1]+14],t);return `<g opacity=".32">${armSVG(SH[side],g,kit,kitd)}</g>`;};
   const hipL=[54,98],hipR=[66,98];
   const legL=legSVG(hipL,[53,122],[52,145]);
   const legR=s.leg?legSVG(hipR,s.leg[0],s.leg[1]):legSVG(hipR,[67,122],[68,145]);
+  const gLeg=s.gleg?`<g opacity=".32">${legSVG(hipR,s.gleg[0],s.gleg[1])}</g>`:'';
   const torso=`<path d="M45 43Q46 37.5 52 36.5L68 36.5Q74 37.5 75 43L72.5 91L47.5 91Z" fill="${kit}" stroke="${kitd}" stroke-width="1.4"/>
    <path d="M66 38L72.5 44L71 90L67 90Z" fill="#000" opacity=".12"/>
-   <path d="M55 36.8L60 44L65 36.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
-   <path d="M47 88L73 88L74.5 104L61.5 104L60 98L58.5 104L45.5 104Z" fill="${SHORT}"/>`;
+   <path d="M55 36.8L60 44L65 36.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>`;
+  const shorts=`<path d="M47 88L73 88L74.5 104L61.5 104L60 98L58.5 104L45.5 104Z" fill="${SHORT}"/>`;
   const head=`<rect x="56.5" y="28" width="7" height="10" rx="3" fill="${SKIND}"/>
    <ellipse cx="60" cy="20" rx="9" ry="10.6" fill="${SKIN}" stroke="${SKIND}" stroke-width="1"/>
    <ellipse cx="50.8" cy="21" rx="1.7" ry="2.6" fill="${SKIN}" stroke="${SKIND}" stroke-width=".8"/><ellipse cx="69.2" cy="21" rx="1.7" ry="2.6" fill="${SKIN}" stroke="${SKIND}" stroke-width=".8"/>
    <path d="M51 18Q51 8.5 60 8.5Q69.5 8.5 69 18Q66 12.5 60 13Q54 12.5 51 18Z" fill="#3a2a1e"/>
    <circle cx="56.6" cy="21" r="1" fill="#2a1f18"/><circle cx="63.4" cy="21" r="1" fill="#2a1f18"/>
    <path d="M57.4 26.2Q60 27.4 62.6 26.2" fill="none" stroke="#a5634a" stroke-width="1" stroke-linecap="round"/>`;
+  const upper=`${torso}${head}${ghost('A',mA,s.gA)}${ghost('B',mB,s.gB)}${armSVG(SH.A,mA,kit,kitd)}${armSVG(SH.B,mB,kit,kitd)}`;
   return `<svg class="sigsvg" viewBox="-6 -20 140 176" ${size?`width="${size}"`:''} role="img" aria-label="Signal">
    <ellipse cx="60" cy="150" rx="26" ry="3.8" fill="var(--sigsh)"/>
-   ${legL}${legR}${torso}${head}${armSVG(SH.A,A,kit,kitd)}${armSVG(SH.B,B,kit,kitd)}${s.x||''}</svg>`;
+   ${legL}${gLeg}${legR}${shorts}${lean?`<g transform="rotate(${lean} ${C[0]} ${C[1]})">${upper}</g>`:upper}${s.x||''}</svg>`;
 }
 // Questions générées : « Que signifie ce geste ? » et « Quel est le geste pour… ? »
 QRAW.SIG=[];
