@@ -474,8 +474,6 @@ VAR:["M19 : 2 × 35 min, pas de prolongation ; 22 joueurs → 6 premières ligne
 "VII : 7 joueurs, 5 remplaçants, 2 × 7 min (finale 2 × 10), mi-temps 2 min, jaune 2 min, transformation en drop dans les 30 s, renvoi par l'équipe qui a marqué, mêlée à 3, juges d'en-but, prolongations au premier point.",
 "X : 10 joueurs, 2 × 10 min, remplacements à tout moment par la médiane, mêlée à 5 (3+2), transformation en drop, jaune 2 min.",
 "Game-On : terrain adaptable, ballon taille 4/4,5/5, mini 10 joueurs égal, mêlées simulées ou 1,5 m, remplacements libres illimités, matchs ≥ 40 min, marque impossible sur coup de pied d'attaque des 22."],
-SIG:["Pénalité : bras levé en oblique vers l'équipe non fautive.","Coup franc : bras plié à angle droit vers l'équipe non fautive.","Essai : dos à la ligne de ballon mort, bras levé à la verticale.",
-"Avantage : bras tendu à hauteur de la taille vers l'équipe non fautive ~5 s.","Mêlée : bras tendu à l'horizontale vers l'équipe qui introduit.","Plaquage haut : main à l'horizontale devant le cou.","TMO : rectangle dessiné avec les index. HIA : main sur la tête. Arrêt du temps : bras en T."],
 FFR:["Catégorie A : pro, Nationale, N2, Fédérale 1, Espoirs… (World Rugby). B : jeunes élite (variante M19). C' : Fédérale 2, Fédérale 3, Fédérale B, Excellence B, Fédérale féminine 1. C : Régionales 1/2/3, réserves régionales, Fédérale féminine 2.",
 "C et C' : 16 joueurs mini / 22 maxi, 3 premières lignes titulaires + 1 remplaçant mini, table de marque, pas d'aptitude spécifique de poste en 1re ligne.",
 "Plaquage C/C' : deux bras, de la taille aux pieds ; « armer du bras » interdit ; pas de squeeze ball (P) ; ne pas aller au sol volontairement sans être plaqué (P) ; plaquage à deux non simultané.",
@@ -1106,7 +1104,6 @@ R6:[
 ['tf',0,"Le ballon touche l'arbitre et aucune équipe n'en tire avantage : le jeu continue.",true,"Règle 6.10.","6.10"]
 ],
 R7:[
-['tf',0,"L'arbitre signale l'avantage en tendant le bras vers l'équipe non fautive.",true,"Bras tendu à hauteur de la taille.","Signaux"],
 ['qcu',0,"Après un en-avant, l'équipe non fautive récupère le ballon et avance de 20 m. Décision ?",["L'avantage est obtenu : le jeu continue","Mêlée pour l'en-avant","Pénalité","Coup franc"],0,"Avantage clair et réel obtenu.","7.2a"],
 ['tf',0,"L'avantage doit être joué même s'il devient dangereux de laisser le jeu se poursuivre.",false,"L'arbitre siffle immédiatement en cas de danger.","7.3g"],
 ['tf',0,"Si l'avantage ne donne rien, l'arbitre revient à la sanction de la faute initiale.",true,"Règle 7.2b.","7.2b"],
@@ -1234,16 +1231,16 @@ QRAW.R19.push(['open',2,"Citez les cas où la mêlée ordonnée prend fin.",[["L
 
 // Signaux de l'arbitre — pictogrammes originaux dessinés d'après les descriptions de la Signalétique World Rugby 2026
 // Figure vue de face. Côté droit de l'image = direction de l'équipe concernée.
-const SH={A:[47,42],B:[73,42]};
-const ARMDOWN={A:[[44,64],[43,86]],B:[[76,64],[77,86]]};
+const SH={A:[46.5,42.5],B:[73.5,42.5]};
+const ARMDOWN={A:[[43,65],[42,86]],B:[[77,65],[78,86]]};
 const RED='#E4002B';
 const arrow=(x1,y1,x2,y2)=>{const a=Math.atan2(y2-y1,x2-x1),h=5;return `<path d="M${x1} ${y1}L${x2} ${y2}M${x2-h*Math.cos(a-.5)} ${y2-h*Math.sin(a-.5)}L${x2} ${y2}L${x2-h*Math.cos(a+.5)} ${y2-h*Math.sin(a+.5)}" stroke="${RED}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;};
 const dbl=(x1,y1,x2,y2)=>arrow((x1+x2)/2,(y1+y2)/2,x1,y1)+arrow((x1+x2)/2,(y1+y2)/2,x2,y2);
 const circ=(cx,cy,r)=>`<path d="M${cx+r} ${cy}A${r} ${r} 0 1 1 ${cx} ${cy-r}" stroke="${RED}" stroke-width="2" fill="none" stroke-linecap="round"/>`+arrow(cx+1,cy-r-2,cx,cy-r);
 const qarrow=(x1,y1,cx,cy,x2,y2,both)=>{const hd=(px,py,qx,qy)=>{const a=Math.atan2(qy-py,qx-px),h=5;return `M${qx-h*Math.cos(a-.5)} ${qy-h*Math.sin(a-.5)}L${qx} ${qy}L${qx-h*Math.cos(a+.5)} ${qy-h*Math.sin(a+.5)}`;};return `<path d="M${x1} ${y1}Q${cx} ${cy} ${x2} ${y2}${hd(cx,cy,x2,y2)}${both?hd(cx,cy,x1,y1):''}" stroke="${RED}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;};
-const fist=(x,y)=>`<circle cx="${x}" cy="${y}" r="5.5" fill="var(--sigs)" stroke="var(--sigc)" stroke-width="1.5"/>`;
-const fingers=(x,y,up)=>`<path d="M${x-4} ${y}l-2 ${up?-6:6}M${x} ${y-1}v${up?-7:7}M${x+4} ${y}l2 ${up?-6:6}" stroke="var(--sigs)" stroke-width="2" stroke-linecap="round"/>`;
-const idx=(x,y)=>`<path d="M${x} ${y}v-8" stroke="var(--sigs)" stroke-width="2.4" stroke-linecap="round"/>`;
+const fist=(x,y)=>`<circle cx="${x}" cy="${y}" r="5.6" fill="#e8b48a" stroke="#c98f63" stroke-width="1.2"/><path d="M${x-3} ${y-1}h6M${x-3} ${y+1.5}h6" stroke="#c98f63" stroke-width=".9"/>`;
+const fingers=(x,y,up)=>`<path d="M${x-4} ${y}l-2 ${up?-6:6}M${x-1.3} ${y-1}l-.6 ${up?-7.5:7.5}M${x+1.3} ${y-1}l.6 ${up?-7.5:7.5}M${x+4} ${y}l2 ${up?-6:6}" stroke="#e8b48a" stroke-width="2.3" stroke-linecap="round"/>`;
+const idx=(x,y)=>`<path d="M${x} ${y}v-9" stroke="#e8b48a" stroke-width="2.6" stroke-linecap="round"/>`;
 const BALL=(x,y,dash)=>`<ellipse cx="${x}" cy="${y}" rx="7" ry="4.5" fill="${dash?'none':'#8a5a2b'}" ${dash?'stroke="#8a5a2b" stroke-width="1.6" stroke-dasharray="3 2"':''}/>`;
 const SIGNALS=[
  {k:'pen',n:'Pénalité',d:"Épaules parallèles aux lignes de touche, bras levé en oblique vers l'équipe non fautive.",l:0,B:[[88,27],[103,12]]},
@@ -1298,23 +1295,41 @@ const SIGNALS=[
  {k:'chrono',n:"Arrêt ou reprise du chronométrage",d:"Tendre le bras vers le ciel et siffler au moment où le décompte doit commencer ou s'arrêter.",l:2,B:[[74,20],[75,0]],x:`<rect x="53" y="28" width="9" height="5" rx="2" fill="#555"/><path d="M48 18l-6-4M46 26h-8M48 34l-6 4" stroke="${RED}" stroke-width="1.8" stroke-linecap="round"/>`,nx:['essai','soigneur','tourne']},
  {k:'options',n:"Options pour hors-jeu : pénalité ou mêlée",d:"Un bras indique la pénalité ; l'autre est pointé vers l'endroit où pourrait être jouée la mêlée.",l:2,B:[[88,27],[103,12]],A:[[30,54],[12,66]],nx:['pen']},
  {k:'soigneur',n:"Appel du soigneur",d:"Un bras levé indique qu'un soigneur est nécessaire suite à la blessure d'un joueur.",l:2,B:[[80,21],[84,1]],x:fingers(84,-2,true)+`<path d="M98 10h10M103 5v10" stroke="#16a34a" stroke-width="3"/>`,nx:['essai','chrono','tourne','jaune','rouge']},
- {k:'aabut',n:'Arbitre assistant : tentative de but réussie',d:"L'arbitre assistant lève son drapeau.",l:1,aa:1,B:[[76,20],[77,0]],x:`<line x1="77" y1="2" x2="77" y2="-14" stroke="var(--sigc)" stroke-width="2"/><rect x="77" y="-14" width="14" height="10" fill="#F5C400"/>`},
- {k:'aadel',n:'Arbitre assistant : jeu déloyal',d:"Drapeau tenu à l'horizontale, pointé vers le terrain, à angle droit avec la ligne de touche.",l:2,aa:1,B:[[94,44],[112,44]],x:`<line x1="110" y1="44" x2="128" y2="44" stroke="var(--sigc)" stroke-width="2"/><rect x="118" y="44" width="11" height="9" fill="#F5C400"/>`},
- {k:'aatouche',n:'Arbitre assistant : touche et équipe qui lance',d:"Drapeau levé, à la marque de touche, l'autre bras tendu vers l'équipe qui bénéficie du lancer.",l:2,aa:1,A:[[44,20],[43,0]],B:[[95,42],[116,42]],x:`<line x1="43" y1="2" x2="43" y2="-14" stroke="var(--sigc)" stroke-width="2"/><rect x="29" y="-14" width="14" height="10" fill="#F5C400"/>`}
+ {k:'aabut',n:'Arbitre assistant : tentative de but réussie',d:"L'arbitre assistant lève son drapeau.",l:1,aa:1,B:[[76,20],[77,0]],x:`<line x1="77" y1="2" x2="77" y2="-14" stroke="#333" stroke-width="2"/><rect x="77" y="-14" width="14" height="10" fill="#F5C400"/>`},
+ {k:'aadel',n:'Arbitre assistant : jeu déloyal',d:"Drapeau tenu à l'horizontale, pointé vers le terrain, à angle droit avec la ligne de touche.",l:2,aa:1,B:[[94,44],[112,44]],x:`<line x1="110" y1="44" x2="128" y2="44" stroke="#333" stroke-width="2"/><rect x="118" y="44" width="11" height="9" fill="#F5C400"/>`},
+ {k:'aatouche',n:'Arbitre assistant : touche et équipe qui lance',d:"Drapeau levé, à la marque de touche, l'autre bras tendu vers l'équipe qui bénéficie du lancer.",l:2,aa:1,A:[[44,20],[43,0]],B:[[95,42],[116,42]],x:`<line x1="43" y1="2" x2="43" y2="-14" stroke="#333" stroke-width="2"/><rect x="29" y="-14" width="14" height="10" fill="#F5C400"/>`}
 ];
 const SIGBY={};SIGNALS.forEach(s=>SIGBY[s.k]=s);
+const SKIN='#e8b48a',SKIND='#c98f63',KIT='#1f3a8a',KITD='#152a66',SHORT='#1b1b22',BOOT='#111',SOCK='#1f3a8a';
+function seg(a,b,w,c,o){return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${o?` opacity="${o}"`:''}/>`;}
+function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+function limb(a,b,w,c,cd){return seg(a,b,w+1.8,cd)+seg(a,b,w,c);}
+function hand(e,h){const ang=Math.atan2(h[1]-e[1],h[0]-e[0])*180/Math.PI;const c=lerp(e,h,1);const cx=c[0]+2.2*Math.cos(ang*Math.PI/180),cy=c[1]+2.2*Math.sin(ang*Math.PI/180);
+  return `<g transform="rotate(${ang.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)})"><ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="5.4" ry="3.9" fill="${SKIN}" stroke="${SKIND}" stroke-width="1"/><line x1="${(cx+1).toFixed(1)}" y1="${(cy-3.2).toFixed(1)}" x2="${(cx-2.5).toFixed(1)}" y2="${(cy-4.6).toFixed(1)}" stroke="${SKIND}" stroke-width="2.2" stroke-linecap="round"/></g>`;}
+function armSVG(sh,p,kit,kitd){const el=p[0],hd=p[1];const sl=lerp(sh,el,.55);
+  return limb(sh,el,7.6,SKIN,SKIND)+limb(el,hd,6.4,SKIN,SKIND)+`<circle cx="${el[0]}" cy="${el[1]}" r="3.7" fill="${SKIN}"/>`+limb(sh,sl,10.5,kit,kitd)+hand(el,hd);}
+function legSVG(hip,knee,foot){const sockTop=lerp(knee,foot,.42);const ank=foot;
+  return limb(hip,knee,9.4,SKIN,SKIND)+limb(knee,ank,7.8,SKIN,SKIND)+limb(sockTop,ank,8.6,SOCK,KITD)+(()=>{const p=lerp(sockTop,ank,.04),q=lerp(sockTop,ank,.16);return `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#fff" stroke-width="8.6"/>`;})()+
+  `<ellipse cx="${ank[0]}" cy="${ank[1]+3}" rx="6.5" ry="3.6" fill="${BOOT}"/>`;}
 function sigSVG(k,size){
   const s=SIGBY[k];const A=s.A||ARMDOWN.A,B=s.B||ARMDOWN.B;
-  const arm=(sh,p)=>`<path d="M${sh[0]} ${sh[1]}L${p[0][0]} ${p[0][1]}L${p[1][0]} ${p[1][1]}" stroke="var(--sigc)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${p[1][0]}" cy="${p[1][1]}" r="3.6" fill="var(--sigs)"/>`;
-  const legB=s.leg?`<path d="M67 92L${s.leg[0][0]} ${s.leg[0][1]}L${s.leg[1][0]} ${s.leg[1][1]}" stroke="var(--sigl)" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`:`<path d="M67 92L70 148" stroke="var(--sigl)" stroke-width="7" stroke-linecap="round"/>`;
-  const jersey=s.aa?'#C8A951':'var(--sigj)';
+  const kit=s.aa?'#c8a24a':KIT,kitd=s.aa?'#9c7b2c':KITD;
+  const hipL=[54,98],hipR=[66,98];
+  const legL=legSVG(hipL,[53,122],[52,145]);
+  const legR=s.leg?legSVG(hipR,s.leg[0],s.leg[1]):legSVG(hipR,[67,122],[68,145]);
+  const torso=`<path d="M45 43Q46 37.5 52 36.5L68 36.5Q74 37.5 75 43L72.5 91L47.5 91Z" fill="${kit}" stroke="${kitd}" stroke-width="1.4"/>
+   <path d="M66 38L72.5 44L71 90L67 90Z" fill="#000" opacity=".12"/>
+   <path d="M55 36.8L60 44L65 36.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
+   <path d="M47 88L73 88L74.5 104L61.5 104L60 98L58.5 104L45.5 104Z" fill="${SHORT}"/>`;
+  const head=`<rect x="56.5" y="28" width="7" height="10" rx="3" fill="${SKIND}"/>
+   <ellipse cx="60" cy="20" rx="9" ry="10.6" fill="${SKIN}" stroke="${SKIND}" stroke-width="1"/>
+   <ellipse cx="50.8" cy="21" rx="1.7" ry="2.6" fill="${SKIN}" stroke="${SKIND}" stroke-width=".8"/><ellipse cx="69.2" cy="21" rx="1.7" ry="2.6" fill="${SKIN}" stroke="${SKIND}" stroke-width=".8"/>
+   <path d="M51 18Q51 8.5 60 8.5Q69.5 8.5 69 18Q66 12.5 60 13Q54 12.5 51 18Z" fill="#3a2a1e"/>
+   <circle cx="56.6" cy="21" r="1" fill="#2a1f18"/><circle cx="63.4" cy="21" r="1" fill="#2a1f18"/>
+   <path d="M57.4 26.2Q60 27.4 62.6 26.2" fill="none" stroke="#a5634a" stroke-width="1" stroke-linecap="round"/>`;
   return `<svg class="sigsvg" viewBox="-6 -20 140 176" ${size?`width="${size}"`:''} role="img" aria-label="Signal">
-   <ellipse cx="60" cy="152" rx="24" ry="3.5" fill="var(--sigsh)"/>
-   <path d="M53 92L50 148" stroke="var(--sigl)" stroke-width="7" stroke-linecap="round"/>${legB}
-   <path d="M47 40Q60 36 73 40L71 94H49Z" fill="${jersey}"/>
-   <rect x="49" y="84" width="22" height="11" rx="2" fill="var(--sigl)"/>
-   <circle cx="60" cy="24" r="10" fill="var(--sigs)"/>
-   ${arm(SH.A,A)}${arm(SH.B,B)}${s.x||''}</svg>`;
+   <ellipse cx="60" cy="150" rx="26" ry="3.8" fill="var(--sigsh)"/>
+   ${legL}${legR}${torso}${head}${armSVG(SH.A,A,kit,kitd)}${armSVG(SH.B,B,kit,kitd)}${s.x||''}</svg>`;
 }
 // Questions générées : « Que signifie ce geste ? » et « Quel est le geste pour… ? »
 QRAW.SIG=[];
