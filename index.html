@@ -186,10 +186,10 @@ table.sc td:last-child{text-align:right;font-weight:700}
 details summary::-webkit-details-marker{color:var(--acc)}
 
 .sigsvg{display:block;width:100%;height:auto}
-.sigbig{max-width:220px;margin:0 auto 14px;background:var(--card2);border:1px solid var(--brd);border-radius:14px;padding:10px}
+.sigbig{max-width:128px;margin:0 auto 14px;background:var(--card2);border:1px solid var(--brd);border-radius:14px;padding:10px}
 .siggrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sigopt{position:relative;border:2px solid var(--brd);border-radius:14px;background:var(--card2);padding:8px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
-.sigopt .sigsvg{max-width:150px}
+.sigopt .sigsvg{max-width:92px}
 .sigopt .kb{position:absolute;top:6px;right:6px}
 .sigopt.sel{border-color:var(--acc);background:var(--accbg)}.sigopt.good{border-color:var(--ok);background:var(--okbg)}.sigopt.bad{border-color:var(--err);background:var(--errbg)}.sigopt.miss{border-color:var(--ok);border-style:dashed}
 .gal{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px}
@@ -204,6 +204,10 @@ details summary::-webkit-details-marker{color:var(--acc)}
 .lnum{width:26px;height:26px;border-radius:8px;background:var(--accbg);color:var(--acc);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
 .lbox input{padding:9px 11px}
 @media (min-width:1000px){.lboxes{grid-template-columns:1fr 1fr}}
+
+.sigopt{padding:4px 6px 6px}.siggrid{gap:8px}
+@media (min-width:1000px){.sigbig{max-width:170px}.sigopt .sigsvg{max-width:120px}}
+.sig2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sig2 .opt{margin:0;padding:10px;font-size:13.5px;align-items:center}.sig2 .opt .bx{width:18px;height:18px}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -211,7 +215,7 @@ details summary::-webkit-details-marker{color:var(--acc)}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rugby Arbitrage">
-<style>.hdr{padding-top:max(14px,env(safe-area-inset-top))}.nav{padding-bottom:env(safe-area-inset-bottom)}</style></head><body><div class="app" id="app"></div>
+<style>.hdr{padding-top:calc(env(safe-area-inset-top) + 14px)}.nav{padding-bottom:env(safe-area-inset-bottom)}@media (min-width:1000px){.nav{padding-top:env(safe-area-inset-top)}}#toast{bottom:calc(92px + env(safe-area-inset-bottom))!important}</style></head><body><div class="app" id="app"></div>
 <script>// Définitions — Règles du Jeu World Rugby 2026 (version 2607), texte officiel
 const DEFS = [
 ["50:22","Lorsqu'un ballon est botté par un joueur dans sa propre moitié de terrain et qu'il sort indirectement en touche dans les 22 mètres adverses. Le ballon ne doit pas être rentré dans sa moitié de terrain par l'équipe qui a envoyé le ballon en touche.","18.8a"],
@@ -1665,7 +1669,9 @@ function vDefList(){
 // ---------- Sessions d'apprentissage ----------
 function mkQ(q){return{type:'q',q,id:q.id};}
 function mkD(d,mode){return{type:'def',d,mode,id:d.id};}
-function newSession(title,items,kind){SES={kind:kind||'learn',title,items,i:0,res:[],st:null};VIEW='session';render();scrollTo(0,0);}
+function newSession(title,items,kind){const from=(VIEW==='session'&&SES&&SES.from)?SES.from:{v:VIEW,p:PARAM};SES={kind:kind||'learn',title,items,i:0,res:[],st:null,from};VIEW='session';render();scrollTo(0,0);}
+function fromLabel(f){if(!f)return 'Accueil';if(f.v==='topic'){const t=TOPIC[f.p];return t?(t.g==='law'?'Règle '+t.n:t.t.split(' (')[0]):'Règles';}return {home:'Accueil',rules:'Règles',defs:'Définitions',deflist:'Lexique',review:'Réviser',exam:'Examen',settings:'Paramètres'}[f.v]||'Accueil';}
+function backFrom(){const f=SES&&SES.from;SES=null;f?go(f.v,f.p):go('home');}
 function orderByNeed(list){const t=now();return list.map(x=>{const r=rec(x.id);return{x,k:!r?0:r.b===0?.5:r.due<=t?1:2+r.b+Math.random()}}).sort((a,b)=>a.k-b.k||Math.random()-.5).map(o=>o.x);}
 function startTopic(k,n){const qs=orderByNeed(qsFor(k).map(mkQ));newSession((TOPIC[k].g==='law'?'Règle '+TOPIC[k].n+' — ':'')+TOPIC[k].t,shuffle(n>=qs.length?qs:qs.slice(0,n)));}
 const QN_OPTS=[5,10,15,20,30,'all'];
@@ -1716,7 +1722,9 @@ function qHTML(q,ans,show){
     h+=`<div class="qtxt">${esc(q.q)}</div>${multi?'<div class="tiny muted" style="margin:-8px 0 10px">Plusieurs réponses possibles (toutes ou aucune peuvent être vraies).</div>':''}`;
     if(q.sig==='img')h+=`<div class="sigbig">${sigSVG(q.sk)}</div>`;
     if(q.sig==='name'){const ord=q._ord||(q._ord=shuffle(q.o.map((_,i)=>i)));h+=`<div class="siggrid">${ord.map((i,pos)=>{const on=a===i,ok=q.a===i;let c='sigopt';if(on)c+=' sel';if(show){if(ok)c+=on?' good':' miss';else if(on)c+=' bad';}return `<button class="${c}" onclick="setAns(${i})">${sigSVG(q.o[i])}<kbd class="kb">${pos+1}</kbd>${show?`<span class="tiny">${esc(SIGBY[q.o[i]].n)}</span>`:''}</button>`;}).join('')}</div>`;if(show)h+=fbHTML(q,ans);return h;}
+    if(q.sig==='img')h+='<div class="sig2">';
     h+=(q._ord||(q._ord=shuffle(q.o.map((_,i)=>i)))).map((i,pos)=>{const on=multi?a.includes(i):a===i;const ok=multi?q.a.includes(i):q.a===i;let c='opt'+(multi?'':' radio');if(on)c+=' sel';if(show){if(ok)c+=on?' good':' miss';else if(on)c+=' bad';}return `<button class="${c}" onclick="setAns(${i})"><span class="bx">${on?'✓':''}</span><span class="grow">${esc(optLabel(q,i))}</span><kbd class="kb">${pos+1}</kbd></button>`;}).join('');
+    if(q.sig==='img')h+='</div>';
   }else{
     h+=`<div class="qtxt">${q.t==='case'?'<span class="sec-h">Situation — donnez et motivez votre décision</span><br>':''}${esc(q.q)}</div>`;
     if(q.boxes){const a=Array.isArray(ans)?ans:[];h+=`<div class="nbexp">${q.boxes} réponse${q.boxes>1?'s':''} attendue${q.boxes>1?'s':''}${q.k.length>q.boxes?` <span class="muted">(parmi ${q.k.length} possibles)</span>`:''}</div><div class="lboxes">${Array.from({length:q.boxes},(_,i)=>`<div class="lbox"><span class="lnum">${i+1}</span><input data-li="${i}" ${show?'disabled':''} value="${esc(a[i]||'')}" placeholder="Réponse ${i+1}" oninput="listIn(${i},this.value)" onkeydown="listKey(event,${i})"></div>`).join('')}</div>`;}
@@ -1819,7 +1827,7 @@ function nextItem(){const S=SES;const it=S.items[S.i];
   const f=fracOf(it,S.cur,S.ticks);S.res.push({it,f,ans:S.cur});
   if(it.type!=='cloze'&&it.type!=='rap')srsUp(it.id,f);else markDay();
   S.i++;S.cur=undefined;S.ticks=null;S.st=null;render();scrollTo(0,0);}
-function quitSes(){if(SES&&SES.res.length)ST.hist.push({kind:'learn',d:now(),n:SES.res.length,f:avg(SES.res.map(r=>r.f))});save();SES=null;go('home');}
+function quitSes(){if(SES&&SES.res.length)ST.hist.push({kind:'learn',d:now(),n:SES.res.length,f:avg(SES.res.map(r=>r.f))});save();backFrom();}
 const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
 function sessionEnd(){
   const S=SES;const f=avg(S.res.map(r=>r.f));const p=Math.round(f*100);
@@ -1827,7 +1835,7 @@ function sessionEnd(){
   const miss=S.res.filter(r=>r.f<.7);
   return `<div class="card" style="text-align:center"><div class="sec-h">${esc(S.title)}</div><div class="res-big ${p>=70?'pass':p>=50?'':'fail'}" style="margin:10px 0">${p}%</div><div class="muted small">${S.res.filter(r=>r.f>=.7).length} réussies sur ${S.res.length}</div></div>
   ${miss.length?`<div class="h2">À retravailler</div>${miss.map(r=>`<div class="card small"><b>${esc(labelOf(r.it))}</b><div class="muted tiny" style="margin-top:4px">${esc(answerOf(r.it))}</div></div>`).join('')}`:''}
-  <div class="row" style="gap:8px"><button class="btn grow" onclick="SES=null;go('home')">Accueil</button>${miss.length?`<button class="btn sec grow" onclick='retry()'>Refaire les erreurs</button>`:''}</div>`;
+  <div class="row" style="gap:8px"><button class="btn grow" onclick="backFrom()">${IC.back} Retour : ${esc(fromLabel(SES.from))}</button>${miss.length?`<button class="btn sec grow" onclick='retry()'>Refaire les erreurs</button>`:''}</div>`;
 }
 function retry(){const items=SES.res.filter(r=>r.f<.7).map(r=>r.it);items.forEach(it=>{it.opts=null;});newSession('Correction des erreurs',shuffle(items));}
 function labelOf(it){if(it.type==='q')return it.q.sig==='img'?'Que signifie ce geste ? ('+SIGBY[it.q.sk].n+')':it.q.q;if(it.type==='def')return it.d.term;if(it.type==='cloze')return it.c.t;if(it.type==='rap')return it.r.t;return '';}
@@ -1943,7 +1951,7 @@ function examRes(){
   ${!R.minOK?'<div class="fb ko small" style="text-align:left">Une partie est sous le minimum éliminatoire.</div>':''}</div>
   <div class="card"><table class="sc">${R.secs.map(s=>`<tr><td>${esc(s.n)}</td><td class="${S.E.min&&s.sc<s.max*S.E.min?'fail':''}">${s.sc} / ${s.max}</td></tr>`).join('')}</table></div>
   ${wrong.length?`<div class="h2">Corrections (${wrong.length})</div>${wrong.map(o=>`<div class="card small"><div class="sec-h tiny">${esc(S.E.sections[o.it.sec].n)}</div><b>${esc(labelOf(o.it))}</b><div class="muted" style="margin-top:4px">${esc(answerOf(o.it))}</div>${o.it.type==='def'?`<div style="margin-top:6px">${diffHTML(compareText(S.ans[o.i]||'',o.it.d.def).diff)}</div>`:''}</div>`).join('')}`:''}
-  <div class="row" style="gap:8px"><button class="btn grow" onclick="SES=null;go('home')">Accueil</button><button class="btn red grow" onclick="SES=null;VIEW='exam';render()">Nouvel examen</button></div>`;
+  <div class="row" style="gap:8px"><button class="btn grow" onclick="SES=null;go('exam')">${IC.back} Retour : Examen</button><button class="btn red grow" onclick="SES=null;VIEW='exam';startExam()">Nouvel examen</button></div>`;
 }
 
 // ---------- Paramètres ----------
