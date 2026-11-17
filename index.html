@@ -1547,7 +1547,7 @@ function vRules(){
   const row=t=>{const n=qsFor(t.k).length,m=Math.round(topicMastery(t.k)*100);return `<button class="it" onclick="go('topic','${t.k}')"><div class="num">${t.n}</div><div class="grow"><b class="small">${t.g==='law'?'Règle '+t.n+' — ':''}${esc(t.t)}</b><div class="row" style="margin-top:5px"><div class="bar grow"><u style="width:${m}%"></u></div><span class="tiny muted">${n} q · ${m}%</span></div></div></button>`;};
   const oth=TOPICS.filter(t=>t.g==='other'&&(!t.min||LV()>=t.min));
   return `<div class="h1">Quiz par règle</div><p class="muted small">Règles du Jeu World Rugby 2026 et dispositions FFR. Questions filtrées pour le niveau ${LEVELS[LV()].code} (et inférieurs).</p>
-  <div class="row" style="margin:12px 0"><button class="btn block" onclick="startMixed()">Quiz mélangé (20 questions, toutes règles)</button></div>
+  <div class="row" style="margin:12px 0"><button class="btn block" onclick="startMixed()">Quiz mélangé (${ST.qn&&ST.qn!=='all'?ST.qn:ST.qn==='all'?40:20} questions, toutes règles)</button></div>
   <div class="h2">Règles du jeu</div><div class="list cols">${TOPICS.filter(t=>t.g==='law').map(row).join('')}</div>
   <div class="h2">Compléments</div><div class="list cols">${oth.map(row).join('')}</div>`;
 }
@@ -1563,7 +1563,7 @@ function vTopic(){
   ${(()=>{const s=topicStats(t.k);return `<div class="tstats"><div><b>${s.seen}/${s.n}</b><span>vues</span></div><div><b>${s.ok}/${s.n}</b><span>réussies</span></div><div><b>${s.anch}/${s.n}</b><span>ancrées</span></div><div><b>${s.due}</b><span>à revoir</span></div></div>`;})()}
   <details class="card small" style="padding:10px 14px"><summary style="cursor:pointer;font-weight:700">Comment progresse la maîtrise ?</summary><div class="muted" style="margin-top:8px">Chaque question réussie compte <b>40 %</b>, puis <b>60 %</b> si tu la réussis une deuxième fois. Pour aller jusqu'à 100 %, il faut la réussir à nouveau <b>après un délai</b> (4 h, puis 1 j, 3 j, 7 j) : c'est ce qui montre que la règle est vraiment mémorisée, pas seulement retenue sur le moment. Ces questions reviennent toutes seules dans « Réviser ». Une erreur remet la question à zéro.</div></details>
   <div class="row wrapf" style="gap:6px;margin-bottom:12px">${Object.keys(byT).map(k=>`<span class="tag">${lbl[k]} : ${byT[k]}</span>`).join('')}</div>
-  <div class="row" style="gap:8px;margin-bottom:8px"><button class="btn grow" onclick="startTopic('${t.k}',10)" ${qs.length?'':'disabled'}>Quiz (10)</button><button class="btn sec grow" onclick="startTopic('${t.k}',999)" ${qs.length?'':'disabled'}>Tout (${qs.length})</button></div>
+  ${qs.length?`<div class="card" style="padding:12px 14px"><div class="small" style="margin-bottom:6px">Nombre de questions</div><div class="seg" style="margin-bottom:10px">${QN_OPTS.filter(v=>v==='all'||v<qs.length).map(v=>`<button class="${qnSel(qs.length)===v?'on':''}" onclick="setQN(${v==='all'?"'all'":v})">${v==='all'?'Toutes ('+qs.length+')':v}</button>`).join('')}</div><button class="btn block" onclick="startTopic('${t.k}',${qnSel(qs.length)==='all'?999:qnSel(qs.length)})">Lancer le quiz (${qnSel(qs.length)==='all'?qs.length:qnSel(qs.length)} questions)</button></div>`:''}
   ${cz.length?`<button class="btn ghost block" style="margin-bottom:8px" onclick="startCloze('${t.k}')">${IC.pen} Texte à compléter (${cz.length})</button>`:''}
   ${qs.length?'':`<div class="empty">Aucune question à ce niveau pour ce thème.</div>`}
   </div><div class="col">${t.k==='SIG'?`<div class="h2 first">Galerie des signaux</div><div class="gal">${SIGNALS.map(s=>`<div class="gal-it">${sigSVG(s.k)}<b>${esc(s.n)}</b><span>${esc(s.d)}</span></div>`).join('')}</div><div class="tiny muted">Pictogrammes dessinés pour l'appli d'après les descriptions de la signalétique World Rugby 2026. La figure fait face au lecteur ; le côté droit de l'image indique l'équipe concernée.</div>`:`<div class="h2 first">Fiche de synthèse</div><div class="card fiche"><ul>${(FICHES[t.k]||[]).map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`}</div></div>`;
@@ -1604,7 +1604,10 @@ function mkD(d,mode){return{type:'def',d,mode,id:d.id};}
 function newSession(title,items,kind){SES={kind:kind||'learn',title,items,i:0,res:[],st:null};VIEW='session';render();scrollTo(0,0);}
 function orderByNeed(list){const t=now();return list.map(x=>{const r=rec(x.id);return{x,k:!r?0:r.b===0?.5:r.due<=t?1:2+r.b+Math.random()}}).sort((a,b)=>a.k-b.k||Math.random()-.5).map(o=>o.x);}
 function startTopic(k,n){const qs=orderByNeed(qsFor(k).map(mkQ));newSession((TOPIC[k].g==='law'?'Règle '+TOPIC[k].n+' — ':'')+TOPIC[k].t,shuffle(n>=qs.length?qs:qs.slice(0,n)));}
-function startMixed(){newSession('Quiz mélangé',orderByNeed(qsFor(null).map(mkQ)).slice(0,20));}
+const QN_OPTS=[5,10,15,20,30,'all'];
+function qnSel(max){const v=ST.qn||10;return v==='all'||v>=max?'all':v;}
+function setQN(v){ST.qn=v;save();render();}
+function startMixed(){const n=ST.qn&&ST.qn!=='all'?ST.qn:20;newSession('Quiz mélangé',orderByNeed(qsFor(null).map(mkQ)).slice(0,ST.qn==='all'?40:n));}
 function dOpt(){return Object.assign({n:20,ord:'need',from:'A'},ST.dopt||{});}
 function letterOf(t){return norm(t).charAt(0).toUpperCase();}
 const DLETTERS=[...new Set(DITEMS.map(d=>letterOf(d.term)))].filter(c=>/[A-Z]/.test(c));
