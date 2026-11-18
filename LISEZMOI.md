@@ -1,4 +1,4 @@
-# Rugby Arbitrage — version installable
+# Avantage — version installable
 
 Ce dossier contient l'application prête à être mise en ligne. Une fois hébergée, elle s'installe
 sur Android et iPhone comme une vraie application (icône, plein écran, fonctionnement hors connexion).
