@@ -8,6 +8,7 @@ sur Android et iPhone comme une vraie application (icône, plein écran, fonctio
 - `manifest.webmanifest` : nom, couleurs et icônes de l'application
 - `sw.js` : permet le fonctionnement hors connexion
 - `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` : icônes
+- `pdf.min.mjs`, `pdf.worker.min.mjs` : lecteur PDF (bibliothèque libre pdf.js) utilisé pour importer les convocations dans « Mes matchs »
 
 Tous les fichiers doivent rester ensemble, à la racine du même dossier.
 
