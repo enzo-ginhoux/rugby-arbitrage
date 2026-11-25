@@ -1,5 +1,5 @@
 // Service worker : fonctionnement hors connexion
-const CACHE='avantage-e93e2b2935';
+const CACHE='avantage-c3698f0491';
 const FILES=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 const PDFC='avantage-pdfjs-6.2.108'; // lecteur PDF (import des convocations), mis en cache au premier usage
